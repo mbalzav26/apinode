@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 ruta.use(bodyParser.json());
 
 // Obtener de la tabla customers
-/*ruta.get('/customers', (req, res) => {
+ruta.get('/customers', (req, res) => {
   const sql = 'SELECT * FROM customers order by customerNumber';
   conexion.query(sql, (error, results) => {
     if (error) throw error;
@@ -15,7 +15,7 @@ ruta.use(bodyParser.json());
       res.send('No hay resultados');
     }
   });
-});*/
+});
 
 // obtener tabla customers y mostrar el array con las orders de cada customer
 ruta.get('/customers/orders', (req, res) => {
@@ -55,6 +55,27 @@ ruta.get('/customers/:customerNumber', (req, res) => {
     );
 }
 );
+
+
+ruta.get('/customers/:customerNumber/orders', (req, res) => {
+    const { customerNumber } = req.params;
+    const sql = `SELECT * FROM customers WHERE customerNumber = ${customerNumber}`;
+    conexion.query(sql, (error, result) => {
+        if (error) throw error;
+        if (result.length > 0) {
+            const sql = `SELECT * FROM orders WHERE customerNumber = ${customerNumber}`;
+            conexion.query(sql, (error, orders) => {
+                if (error) throw error;
+                result[0].orders = orders;
+                res.json(result);
+            });
+        } else {
+            res.send('No hay resultados');
+        }
+    });
+}
+);
+
 
 // Añadir un nuevo customer 
 ruta.post('/customers', (req, res) => {
