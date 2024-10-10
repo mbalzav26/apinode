@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 ruta.use(bodyParser.json());
 
 // Obtener de la tabla customers
-ruta.get('/customers', (req, res) => {
+/*ruta.get('/customers', (req, res) => {
   const sql = 'SELECT * FROM customers order by customerNumber';
   conexion.query(sql, (error, results) => {
     if (error) throw error;
@@ -15,6 +15,28 @@ ruta.get('/customers', (req, res) => {
       res.send('No hay resultados');
     }
   });
+});*/
+
+// obtener tabla customers y mostrar el array con las orders de cada customer
+ruta.get('/customers/orders', (req, res) => {
+    const sql = 'SELECT * FROM customers order by customerNumber';
+    conexion.query(sql, (error, results) => {
+        if (error) throw error;
+        if (results.length > 0) {
+            results.forEach(customer => {
+                const sql = `SELECT * FROM orders WHERE customerNumber = ${customer.customerNumber}`;
+                conexion.query(sql, (error, orders) => {
+                    if (error) throw error;
+                    customer.orders = orders;
+                    if (results.indexOf(customer) === results.length - 1) {
+                        res.json(results);
+                    }
+                });
+            });
+        } else {
+            res.send('No hay resultados');
+        }
+    });
 });
 
 // Obtener un customer por su customerNumber
@@ -35,8 +57,7 @@ ruta.get('/customers/:customerNumber', (req, res) => {
 );
 
 // Añadir un nuevo customer 
-
-/*ruta.post('/customers', (req, res) => {
+ruta.post('/customers', (req, res) => {
     const sql = 'INSERT INTO customers SET ?';
     const customerObj = {
         customerNumber: req.body.customerNumber,
@@ -78,7 +99,6 @@ ruta.delete('/customers/:id', (req, res) => {
         if (error) throw error;
         res.send('Customer eliminado!');
     });
-});*/
-
+});
 module.exports = ruta;
 
